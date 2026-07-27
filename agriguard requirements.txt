@@ -1,0 +1,26 @@
+Smallholder farmers of Mchicha and Spinach in Tanzania lack a fast, reliable and low-cost way to 
+diagnose crop diseases and pest infestations. Existing options—self-diagnosis, waiting for 
+extension officers, or consulting social media groups—are slow, error-prone or unverified, 
+resulting in poor treatment decisions, reduced yields and unnecessary chemical expenditure. 
+While computer vision offers a proven route to accurate leaf-based diagnosis, most existing mobile 
+agricultural applications stop at providing a diagnostic notification and do not connect that 
+diagnosis to any physical response in the field. This leaves a gap between software-level insight 
+and real-world pest control action. 
+Furthermore, farmers require an interface that is simple enough to operate on an ordinary 
+smartphone without technical expertise, and that can communicate diagnostic results in a form 
+they can immediately act on. There is therefore a need for a mobile-based software subsystem 
+capable of detecting and classifying crop diseases from images, presenting this information 
+through a farmer-friendly interface, and automatically driving a physical pest-control response 
+through a reliable serial data link to companion hardware. 
+1.3. PROJECT OBJECTIVE 
+1.3.1. GENERAL OBJECTIVE 
+The main objective of this study is to develop a machine learning-based smart system that 
+automates plant disease detection and pest control management to improve crop protection for 
+smallholder farmers. 
+1.3.2. SPECIFIC OBJECTIVE 
+To achieve the general objective, the project focuses on the following specific milestones: 
+2i. To develop a machine learning subsystem for crop disease detection. 
+ii. To develop a machine learning subsystem for crop disease and pest classification. 
+iii. To develop a mobile-based subsystem for user interaction. 
+iv. To implement a Serial Communication module in the software application that has 
+command to the Arduino-based hardware trap.
