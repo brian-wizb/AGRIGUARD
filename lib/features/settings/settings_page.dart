@@ -45,6 +45,13 @@ class SettingsPage extends StatelessWidget {
             subtitle: Text(context.tr('localPrototypeDescription')),
           ),
         ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          key: const Key('logoutButton'),
+          onPressed: controller.busy ? null : controller.logout,
+          icon: const Icon(Icons.logout),
+          label: Text(context.tr('logout')),
+        ),
       ],
     );
   }

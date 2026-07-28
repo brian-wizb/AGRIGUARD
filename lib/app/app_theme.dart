@@ -23,9 +23,7 @@ abstract final class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
     );
   }

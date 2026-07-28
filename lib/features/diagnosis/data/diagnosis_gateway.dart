@@ -3,6 +3,7 @@ import '../domain/diagnosis.dart';
 abstract interface class DiagnosisGateway {
   Future<Diagnosis> analyzeLeaf({
     required List<int> imageBytes,
+    required String mimeType,
     required String languageCode,
   });
 }
@@ -13,6 +14,10 @@ abstract interface class DiagnosisGateway {
 /// build configuration, send the leaf image, and validate structured output.
 abstract final class OpenAiBuildConfig {
   static const apiKey = String.fromEnvironment('OPENAI_API_KEY');
+  static const model = String.fromEnvironment(
+    'OPENAI_MODEL',
+    defaultValue: 'gpt-5.6-sol',
+  );
 
   static bool get hasApiKey => apiKey.trim().isNotEmpty;
 }

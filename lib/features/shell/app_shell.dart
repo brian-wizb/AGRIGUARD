@@ -32,10 +32,7 @@ class _AppShellState extends State<AppShell> {
       context.tr('settings'),
     ];
     return Scaffold(
-      appBar: AppBar(
-        title: Text(titles[_index]),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: Text(titles[_index]), centerTitle: false),
       body: IndexedStack(index: _index, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,

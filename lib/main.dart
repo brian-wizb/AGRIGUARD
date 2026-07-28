@@ -4,7 +4,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'app/app_controller.dart';
 import 'app/app_localizations.dart';
 import 'app/app_theme.dart';
+import 'core/preferences/app_preferences.dart';
+import 'core/security/password_hasher.dart';
+import 'core/storage/app_database.dart';
+import 'features/auth/data/sqlite_auth_repository.dart';
 import 'features/auth/login_page.dart';
+import 'features/shell/app_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +17,9 @@ void main() {
 }
 
 class AgriGuardBootstrap extends StatefulWidget {
-  const AgriGuardBootstrap({super.key});
+  const AgriGuardBootstrap({this.controller, super.key});
+
+  final AppController? controller;
 
   @override
   State<AgriGuardBootstrap> createState() => _AgriGuardBootstrapState();
@@ -24,7 +31,17 @@ class _AgriGuardBootstrapState extends State<AgriGuardBootstrap> {
   @override
   void initState() {
     super.initState();
-    _controller = AppController();
+    final database = AppDatabase();
+    _controller =
+        widget.controller ??
+        AppController(
+          SqliteAuthRepository(
+            database: database,
+            passwordHasher: PasswordHasher(),
+          ),
+          SharedAppPreferences(),
+        );
+    _controller.initialize();
   }
 
   @override
@@ -63,8 +80,21 @@ class AgriGuardApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: const LoginPage(),
+        home: !controller.initialized
+            ? const _StartupPage()
+            : controller.isAuthenticated
+            ? const AppShell()
+            : const LoginPage(),
       ),
     );
+  }
+}
+
+class _StartupPage extends StatelessWidget {
+  const _StartupPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }

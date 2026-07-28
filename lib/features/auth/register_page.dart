@@ -2,49 +2,45 @@ import 'package:flutter/material.dart';
 
 import '../../app/app_controller.dart';
 import '../../app/app_localizations.dart';
-import 'register_page.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmationController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _confirmationController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-    FocusScope.of(context).unfocus();
-    await AppControllerScope.of(context).login(
+    final success = await AppControllerScope.of(context).register(
       username: _usernameController.text,
       password: _passwordController.text,
     );
-  }
-
-  Future<void> _openRegistration() async {
-    AppControllerScope.of(context).clearAuthError();
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const RegisterPage()));
+    if (success && mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final controller = AppControllerScope.of(context);
     return Scaffold(
+      appBar: AppBar(title: Text(context.tr('registerTitle'))),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -56,53 +52,36 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: const _LanguageButton(),
+                    Text(
+                      context.tr('registerSubtitle'),
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 24),
-                    Icon(
-                      Icons.eco_rounded,
-                      size: 72,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      context.tr('welcome'),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.tr('loginSubtitle'),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 32),
                     TextFormField(
-                      key: const Key('usernameField'),
+                      key: const Key('registerUsernameField'),
                       controller: _usernameController,
-                      textInputAction: TextInputAction.next,
                       autocorrect: false,
                       decoration: InputDecoration(
                         labelText: context.tr('username'),
                         prefixIcon: const Icon(Icons.person_outline),
                       ),
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty
-                          ? context.tr('requiredField')
-                          : null,
+                      validator: (value) {
+                        final username = value?.trim() ?? '';
+                        if (username.isEmpty) {
+                          return context.tr('requiredField');
+                        }
+                        if (username.length < 3) {
+                          return context.tr('usernameLength');
+                        }
+                        return null;
+                      },
                       onChanged: (_) => controller.clearAuthError(),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      key: const Key('passwordField'),
+                      key: const Key('registerPasswordField'),
                       controller: _passwordController,
                       obscureText: _obscurePassword,
-                      onFieldSubmitted: (_) =>
-                          controller.busy ? null : _login(),
                       decoration: InputDecoration(
                         labelText: context.tr('password'),
                         prefixIcon: const Icon(Icons.lock_outline),
@@ -117,24 +96,44 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      validator: (value) => value == null || value.isEmpty
-                          ? context.tr('requiredField')
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return context.tr('requiredField');
+                        }
+                        if (value.length < 8) {
+                          return context.tr('passwordLength');
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      key: const Key('confirmPasswordField'),
+                      controller: _confirmationController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: context.tr('confirmPassword'),
+                        prefixIcon: const Icon(Icons.lock_reset_outlined),
+                      ),
+                      validator: (value) => value != _passwordController.text
+                          ? context.tr('passwordMismatch')
                           : null,
-                      onChanged: (_) => controller.clearAuthError(),
                     ),
                     if (controller.authErrorCode != null) ...[
                       const SizedBox(height: 12),
                       Text(
                         context.tr(controller.authErrorCode!),
-                        key: const Key('authError'),
-                        style: TextStyle(color: theme.colorScheme.error),
+                        key: const Key('registerError'),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ],
                     const SizedBox(height: 24),
                     FilledButton(
-                      key: const Key('loginButton'),
-                      onPressed: controller.busy ? null : _login,
+                      key: const Key('registerButton'),
+                      onPressed: controller.busy ? null : _register,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         child: controller.busy
@@ -144,13 +143,8 @@ class _LoginPageState extends State<LoginPage> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text(context.tr('login')),
+                            : Text(context.tr('register')),
                       ),
-                    ),
-                    TextButton(
-                      key: const Key('createAccountButton'),
-                      onPressed: controller.busy ? null : _openRegistration,
-                      child: Text(context.tr('createAccount')),
                     ),
                   ],
                 ),
@@ -158,25 +152,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _LanguageButton extends StatelessWidget {
-  const _LanguageButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = AppControllerScope.of(context);
-    return OutlinedButton.icon(
-      key: const Key('languageToggle'),
-      onPressed: controller.toggleLocale,
-      icon: const Icon(Icons.language),
-      label: Text(
-        controller.locale.languageCode == 'en'
-            ? context.tr('swahili')
-            : context.tr('english'),
       ),
     );
   }

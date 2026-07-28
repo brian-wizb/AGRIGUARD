@@ -185,6 +185,22 @@ their references and metadata in SQLite.
 
 ## 8. Implementation Phases
 
+Current implementation status:
+
+- Phase 0 remains an active, non-blocking discovery backlog.
+- Phase 1 application foundation is implemented.
+- Phase 2 local authentication, localization persistence, and local data
+  foundations are implemented and verified by static analysis and automated
+  tests.
+- Phase 3 camera/gallery capture, direct OpenAI vision analysis, structured
+  diagnosis results, and SQLite history are implemented. Static analysis and
+  automated contract/UI tests pass; live phone/API evaluation remains pending
+  until the Android SDK, demonstration key, and evaluation images are available.
+- Phase 4 Android USB OTG serial discovery, connection, safe framed commands,
+  acknowledgements, timeouts, confirmation, emergency stop, and SQLite command
+  auditing are implemented. Static analysis and automated protocol/UI tests
+  pass. Real Arduino hardware-in-the-loop verification remains required.
+
 ### Phase 0 — Provisional Discovery (Non-blocking)
 
 **Goal:** record reasonable assumptions now and refine them as project evidence,

@@ -25,6 +25,18 @@ class AppLocalizations {
       'requiredField': 'This field is required',
       'login': 'Sign in',
       'createAccount': 'Create a local account',
+      'registerTitle': 'Create account',
+      'registerSubtitle':
+          'Create a username and password for this device. Your account is stored locally.',
+      'register': 'Create account',
+      'confirmPassword': 'Confirm password',
+      'usernameLength': 'Username must contain at least 3 characters',
+      'passwordLength': 'Password must contain at least 8 characters',
+      'passwordMismatch': 'Passwords do not match',
+      'usernameTaken': 'That username already exists on this device',
+      'invalidCredentials': 'Incorrect username or password',
+      'unexpectedError': 'Something went wrong. Please try again.',
+      'logout': 'Sign out',
       'language': 'Language',
       'english': 'English',
       'swahili': 'Swahili',
@@ -38,8 +50,28 @@ class AppLocalizations {
           'Point the camera at one clear leaf. AgriGuard will identify the plant and check for visible disease or pest signs.',
       'camera': 'Open camera',
       'gallery': 'Choose leaf image',
-      'cameraComing': 'Camera integration will be added in Phase 3.',
-      'galleryComing': 'Gallery integration will be added in Phase 3.',
+      'analyzingLeaf': 'Analyzing the leaf…',
+      'aiDisclaimer':
+          'AI screening can be wrong. Confirm important treatment decisions with an agricultural expert.',
+      'diagnosisResult': 'Leaf scan result',
+      'notLeaf': 'No leaf detected',
+      'visibleSigns': 'Visible signs',
+      'recommendedActions': 'Recommended next steps',
+      'precautions': 'Precautions',
+      'confidence_high': 'High confidence',
+      'confidence_medium': 'Medium confidence',
+      'confidence_low': 'Low confidence',
+      'missingApiKey':
+          'OpenAI API key is missing. Build with --dart-define=OPENAI_API_KEY=your_key.',
+      'invalidApiKey': 'The OpenAI API key was rejected.',
+      'invalidImage': 'Choose a JPG, PNG, or WEBP image smaller than 8 MB.',
+      'requestTimeout': 'The analysis took too long. Please try again.',
+      'networkError': 'Connect to the internet and try again.',
+      'rateLimited': 'The scan limit was reached. Please wait and try again.',
+      'analysisFailed': 'The leaf could not be analyzed. Please try again.',
+      'invalidResponse':
+          'The diagnosis response was invalid. Please try again.',
+      'historyLoadFailed': 'Scan history could not be loaded.',
       'noCropSelection': 'No crop selection is required.',
       'recentScans': 'Recent scans',
       'emptyHistory': 'Your completed leaf scans will appear here.',
@@ -49,6 +81,35 @@ class AppLocalizations {
       'notConnected': 'Not connected',
       'connect': 'Connect device',
       'hardwareComing': 'Hardware connection will be added in Phase 4.',
+      'findUsbDevices': 'Find USB devices',
+      'availableUsbDevices': 'Available USB devices',
+      'noUsbDevices': 'No USB serial device found',
+      'usbConnectionHint':
+          'Connect the Arduino with a USB OTG adapter, power it on, then refresh.',
+      'usbDiscoveryFailed': 'USB devices could not be searched.',
+      'usbConnectionFailed':
+          'The USB device could not be opened. Allow USB access and try again.',
+      'disconnect': 'Disconnect',
+      'checkStatus': 'Check status',
+      'emergencyStop': 'STOP',
+      'hardwareSafetyTitle': 'Hardware safety',
+      'hardwareSafetyDescription':
+          'Commands are allow-listed, limited to 30 seconds, checked for corruption, and must be acknowledged by the Arduino.',
+      'deviceNotConnected': 'Connect the Arduino trap from the Trap tab first.',
+      'commandTimeout':
+          'The Arduino did not acknowledge the command. Check the cable and trap.',
+      'commandRejected': 'The Arduino rejected the command.',
+      'commandFailed': 'The command could not be sent.',
+      'commandAcknowledged': 'The Arduino acknowledged the command.',
+      'trapActionAvailable': 'Physical trap action available',
+      'trapActionDescription':
+          'This diagnosis may benefit from the connected physical trap. Inspect the area before activation.',
+      'activateTrap': 'Activate trap',
+      'confirmTrapActivation': 'Activate the Arduino trap?',
+      'trapActivationWarning':
+          'Keep people and animals clear. The trap will run for 10 seconds and should stop automatically.',
+      'activateForTenSeconds': 'Activate for 10 seconds',
+      'cancel': 'Cancel',
       'appearanceLanguage': 'Language and display',
       'localPrototype': 'Academic prototype',
       'localPrototypeDescription':
@@ -67,6 +128,18 @@ class AppLocalizations {
       'requiredField': 'Sehemu hii inahitajika',
       'login': 'Ingia',
       'createAccount': 'Fungua akaunti ya kwenye kifaa',
+      'registerTitle': 'Fungua akaunti',
+      'registerSubtitle':
+          'Tengeneza jina la mtumiaji na nenosiri kwa kifaa hiki. Akaunti itahifadhiwa kwenye kifaa.',
+      'register': 'Fungua akaunti',
+      'confirmPassword': 'Thibitisha nenosiri',
+      'usernameLength': 'Jina la mtumiaji liwe na angalau herufi 3',
+      'passwordLength': 'Nenosiri liwe na angalau herufi 8',
+      'passwordMismatch': 'Manenosiri hayafanani',
+      'usernameTaken': 'Jina hilo tayari linatumika kwenye kifaa hiki',
+      'invalidCredentials': 'Jina la mtumiaji au nenosiri si sahihi',
+      'unexpectedError': 'Hitilafu imetokea. Tafadhali jaribu tena.',
+      'logout': 'Toka',
       'language': 'Lugha',
       'english': 'Kiingereza',
       'swahili': 'Kiswahili',
@@ -80,8 +153,27 @@ class AppLocalizations {
           'Elekeza kamera kwenye jani moja linaloonekana vizuri. AgriGuard itatambua mmea na kuchunguza dalili za ugonjwa au wadudu.',
       'camera': 'Fungua kamera',
       'gallery': 'Chagua picha ya jani',
-      'cameraComing': 'Kamera itaunganishwa katika Awamu ya 3.',
-      'galleryComing': 'Matunzio yataunganishwa katika Awamu ya 3.',
+      'analyzingLeaf': 'Jani linachunguzwa…',
+      'aiDisclaimer':
+          'Uchunguzi wa AI unaweza kukosea. Thibitisha maamuzi muhimu ya matibabu na mtaalamu wa kilimo.',
+      'diagnosisResult': 'Matokeo ya uchunguzi wa jani',
+      'notLeaf': 'Hakuna jani lililotambuliwa',
+      'visibleSigns': 'Dalili zinazoonekana',
+      'recommendedActions': 'Hatua zinazopendekezwa',
+      'precautions': 'Tahadhari',
+      'confidence_high': 'Uhakika mkubwa',
+      'confidence_medium': 'Uhakika wa wastani',
+      'confidence_low': 'Uhakika mdogo',
+      'missingApiKey':
+          'Ufunguo wa OpenAI API haupo. Tumia --dart-define=OPENAI_API_KEY=ufunguo_wako.',
+      'invalidApiKey': 'Ufunguo wa OpenAI API umekataliwa.',
+      'invalidImage': 'Chagua picha ya JPG, PNG au WEBP chini ya MB 8.',
+      'requestTimeout': 'Uchunguzi umechukua muda mrefu. Jaribu tena.',
+      'networkError': 'Unganisha intaneti kisha ujaribu tena.',
+      'rateLimited': 'Kikomo cha uchunguzi kimefikiwa. Subiri ujaribu tena.',
+      'analysisFailed': 'Jani halikuweza kuchunguzwa. Jaribu tena.',
+      'invalidResponse': 'Jibu la uchunguzi si sahihi. Jaribu tena.',
+      'historyLoadFailed': 'Historia ya uchunguzi haikuweza kufunguliwa.',
       'noCropSelection': 'Huhitaji kuchagua zao.',
       'recentScans': 'Uchanganuzi wa hivi karibuni',
       'emptyHistory': 'Uchanganuzi wa majani uliokamilika utaonekana hapa.',
@@ -91,6 +183,35 @@ class AppLocalizations {
       'notConnected': 'Haujaunganishwa',
       'connect': 'Unganisha kifaa',
       'hardwareComing': 'Kifaa kitaunganishwa katika Awamu ya 4.',
+      'findUsbDevices': 'Tafuta vifaa vya USB',
+      'availableUsbDevices': 'Vifaa vya USB vinavyopatikana',
+      'noUsbDevices': 'Hakuna kifaa cha USB serial kilichopatikana',
+      'usbConnectionHint':
+          'Unganisha Arduino kwa adapta ya USB OTG, washa, kisha tafuta tena.',
+      'usbDiscoveryFailed': 'Vifaa vya USB havikuweza kutafutwa.',
+      'usbConnectionFailed':
+          'Kifaa cha USB hakikuweza kufunguliwa. Ruhusu matumizi ya USB kisha ujaribu tena.',
+      'disconnect': 'Tenganisha',
+      'checkStatus': 'Kagua hali',
+      'emergencyStop': 'SIMAMISHA',
+      'hardwareSafetyTitle': 'Usalama wa kifaa',
+      'hardwareSafetyDescription':
+          'Amri zimeidhinishwa, zimewekewa kikomo cha sekunde 30, hukaguliwa uharibifu na lazima zithibitishwe na Arduino.',
+      'deviceNotConnected':
+          'Unganisha mtego wa Arduino kwenye sehemu ya Mtego kwanza.',
+      'commandTimeout': 'Arduino haikuthibitisha amri. Kagua waya na mtego.',
+      'commandRejected': 'Arduino imekataa amri.',
+      'commandFailed': 'Amri haikuweza kutumwa.',
+      'commandAcknowledged': 'Arduino imethibitisha amri.',
+      'trapActionAvailable': 'Hatua ya mtego inapatikana',
+      'trapActionDescription':
+          'Uchunguzi huu unaweza kusaidiwa na mtego uliounganishwa. Kagua eneo kabla ya kuwasha.',
+      'activateTrap': 'Washa mtego',
+      'confirmTrapActivation': 'Uwashe mtego wa Arduino?',
+      'trapActivationWarning':
+          'Weka watu na wanyama mbali. Mtego utafanya kazi kwa sekunde 10 na unapaswa kujizima.',
+      'activateForTenSeconds': 'Washa kwa sekunde 10',
+      'cancel': 'Ghairi',
       'appearanceLanguage': 'Lugha na mwonekano',
       'localPrototype': 'Mfano wa kitaaluma',
       'localPrototypeDescription':
@@ -102,9 +223,8 @@ class AppLocalizations {
     },
   };
 
-  String text(String key) => _values[locale.languageCode]?[key] ??
-      _values['en']![key] ??
-      key;
+  String text(String key) =>
+      _values[locale.languageCode]?[key] ?? _values['en']![key] ?? key;
 }
 
 class _AppLocalizationsDelegate
@@ -112,9 +232,9 @@ class _AppLocalizationsDelegate
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) =>
-      AppLocalizations.supportedLocales
-          .any((item) => item.languageCode == locale.languageCode);
+  bool isSupported(Locale locale) => AppLocalizations.supportedLocales.any(
+    (item) => item.languageCode == locale.languageCode,
+  );
 
   @override
   Future<AppLocalizations> load(Locale locale) =>
