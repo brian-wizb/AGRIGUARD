@@ -1,5 +1,8 @@
 allprojects {
     repositories {
+        maven {
+            url = uri("C:/FlutterMaven")
+        }
         google()
         mavenCentral()
     }

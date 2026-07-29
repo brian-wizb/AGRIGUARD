@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_initializing_formals
-
 import 'package:sqflite/sqflite.dart';
 
 import '../../../core/security/password_hasher.dart';
@@ -8,13 +6,10 @@ import '../domain/app_user.dart';
 import 'auth_repository.dart';
 
 class SqliteAuthRepository implements AuthRepository {
-  // Named dependencies make application composition explicit and prevent
-  // accidental argument-order mistakes.
   SqliteAuthRepository({
-    required AppDatabase database,
-    required PasswordHasher passwordHasher,
-  }) : _database = database,
-       _passwordHasher = passwordHasher;
+    required this._database,
+    required this._passwordHasher,
+  });
 
   final AppDatabase _database;
   final PasswordHasher _passwordHasher;
