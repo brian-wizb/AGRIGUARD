@@ -35,9 +35,16 @@ void main() {
                     'condition_name': 'Healthy leaf',
                     'category': 'healthy',
                     'confidence_band': 'high',
+                    'confidence_score': 88,
                     'summary': 'No visible disease signs.',
                     'symptoms': <String>[],
                     'recommended_actions': ['Continue monitoring.'],
+                    'prevention_actions': [
+                      'Maintain balanced watering and nutrition.',
+                    ],
+                    'pest_risk': 'none',
+                    'likely_pests': <String>[],
+                    'alternative_diagnoses': <String>[],
                     'precautions': ['Inspect both sides of the leaf.'],
                     'trap_action_applicable': false,
                   }),
@@ -62,6 +69,7 @@ void main() {
 
     expect(diagnosis.id, 'resp_test');
     expect(diagnosis.category, DiagnosisCategory.healthy);
+    expect(diagnosis.confidenceScore, 88);
     expect(diagnosis.plantName, 'Spinach');
   });
 

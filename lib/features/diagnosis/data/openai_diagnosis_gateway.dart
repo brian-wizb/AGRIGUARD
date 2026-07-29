@@ -12,7 +12,7 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
       _apiKey = apiKey ?? OpenAiBuildConfig.apiKey,
       _model = model ?? OpenAiBuildConfig.model;
 
-  static const promptVersion = 'leaf-diagnosis-v1';
+  static const promptVersion = 'leaf-diagnosis-v3';
   static final _endpoint = Uri.parse('https://api.openai.com/v1/responses');
 
   final http.Client _client;
@@ -36,17 +36,44 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
     final payload = {
       'model': _model,
       'store': false,
-      'reasoning': {'effort': 'low'},
-      'max_output_tokens': 1200,
+      'reasoning': {'effort': 'medium'},
+      'max_output_tokens': 1600,
       'instructions':
-          'You are an agricultural leaf-screening assistant for smallholder '
-          'farmers in Tanzania. Analyze only visible evidence. Do not invent a '
-          'crop, disease, pest, treatment, or certainty. Return all farmer-facing '
-          'text in $language. If the image is not a leaf, is unusable, or evidence '
-          'is insufficient, use category unknown, confidence low, and safe next '
-          'steps. Do not prescribe restricted chemicals or dosages. '
-          'trap_action_applicable is true only for a clearly visible pest problem '
-          'that a generic physical trap could plausibly address.',
+          'Role: You are a practical plant-pathology and crop-pest screening '
+          'assistant for smallholder farmers in Tanzania. '
+          'Goal: Give the most useful evidence-based assessment possible from '
+          'the submitted image. Use visible lesion shape, color, distribution, '
+          'leaf deformation, chlorosis, necrosis, holes, mines, webbing, eggs, '
+          'insects, frass, and crop appearance. Consider common East African '
+          'diseases, pests, nutrient deficiencies, water stress, sun or chemical '
+          'injury, and physical damage. Reliability rules: distinguish symptoms '
+          'actually visible in the image from diagnostic inference; do not report '
+          'a symptom unless it is visible; check whether the symptom distribution '
+          'fits the proposed diagnosis; compare at least three plausible causes '
+          'internally before selecting the best-supported primary result; reduce '
+          'confidence when the crop identity, image quality, or discriminating '
+          'features are uncertain. Do not default to unknown merely because '
+          'evidence is imperfect. When one diagnosis is most plausible, return it '
+          'with a calibrated confidence_score from 0 to 100 and a matching band: '
+          'high is 80-100, medium is 55-79, and low is 1-54. Never use 100. '
+          'List up to three close alternative diagnoses with the observation '
+          'needed to distinguish each one. Use unknown '
+          'only when the image is not a usable plant leaf or no explanation is '
+          'meaningfully better supported than the alternatives. Never claim that '
+          'an image-only screening is laboratory confirmation. '
+          'Return all farmer-facing text in $language. Give practical, locally '
+          'appropriate treatment and prevention steps. Prefer integrated pest '
+          'management: inspection, isolation, sanitation, pruning, resistant '
+          'varieties, irrigation or nutrient correction, biological or physical '
+          'controls, monitoring, and an agricultural extension officer. Name a '
+          'chemical class only when justified, and tell the farmer to follow a '
+          'locally registered product label and professional guidance. Never '
+          'invent a pesticide, restricted chemical, exact product, concentration, '
+          'or dosage. Set pest_risk to none, low, medium, or high based on evidence '
+          'of pest involvement, and list likely pests only when relevant. '
+          'trap_action_applicable is true when the likely pest can reasonably be '
+          'managed or monitored with a generic physical trap, even if the pest '
+          'itself is not visible but its characteristic damage is visible.',
       'input': [
         {
           'role': 'user',
@@ -54,9 +81,13 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
             {
               'type': 'input_text',
               'text':
-                  'Inspect this image. Decide whether it contains a leaf, identify '
-                  'the likely plant when possible, assess image quality, and screen '
-                  'for visible disease or pest signs. Produce the required schema.',
+                  'Inspect the entire image carefully. Identify the likely crop or '
+                  'plant when possible, assess image quality, characterize the '
+                  'visible symptom pattern, compare disease, pest, environmental, '
+                  'nutritional, and physical causes, and return the most likely '
+                  'primary assessment in the required schema. Make the result '
+                  'specific and useful when the evidence supports it; express '
+                  'remaining uncertainty through confidence and close alternatives.',
             },
             {
               'type': 'input_image',
@@ -67,7 +98,7 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
         },
       ],
       'text': {
-        'verbosity': 'low',
+        'verbosity': 'medium',
         'format': {
           'type': 'json_schema',
           'name': 'leaf_diagnosis',
@@ -148,6 +179,11 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
         'enum': ['high', 'medium', 'low'],
       },
       'summary': {'type': 'string'},
+      'confidence_score': {
+        'type': 'integer',
+        'minimum': 0,
+        'maximum': 99,
+      },
       'symptoms': {
         'type': 'array',
         'items': {'type': 'string'},
@@ -157,6 +193,25 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
         'type': 'array',
         'items': {'type': 'string'},
         'maxItems': 5,
+      },
+      'prevention_actions': {
+        'type': 'array',
+        'items': {'type': 'string'},
+        'maxItems': 5,
+      },
+      'pest_risk': {
+        'type': 'string',
+        'enum': ['none', 'low', 'medium', 'high', 'unknown'],
+      },
+      'likely_pests': {
+        'type': 'array',
+        'items': {'type': 'string'},
+        'maxItems': 4,
+      },
+      'alternative_diagnoses': {
+        'type': 'array',
+        'items': {'type': 'string'},
+        'maxItems': 3,
       },
       'precautions': {
         'type': 'array',
@@ -173,9 +228,14 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
       'condition_name',
       'category',
       'confidence_band',
+      'confidence_score',
       'summary',
       'symptoms',
       'recommended_actions',
+      'prevention_actions',
+      'pest_risk',
+      'likely_pests',
+      'alternative_diagnoses',
       'precautions',
       'trap_action_applicable',
     ],

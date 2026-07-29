@@ -29,36 +29,33 @@ class DiagnosisResultPage extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 16),
+          _DiagnosisHeader(diagnosis: diagnosis),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.eco_outlined),
+              title: Text(
+                diagnosis.isLeaf ? diagnosis.plantName : context.tr('notLeaf'),
+              ),
+              subtitle: Text(diagnosis.summary),
+            ),
+          ),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          diagnosis.isLeaf
-                              ? diagnosis.plantName
-                              : context.tr('notLeaf'),
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ),
-                      Chip(
-                        label: Text(
-                          context.tr('confidence_${diagnosis.confidence.name}'),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    context.tr('primaryAssessment'),
+                    style: Theme.of(context).textTheme.labelLarge,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     diagnosis.conditionName,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(diagnosis.summary),
                 ],
               ),
             ),
@@ -68,12 +65,25 @@ class DiagnosisResultPage extends StatelessWidget {
             items: diagnosis.symptoms,
           ),
           _ResultSection(
-            title: context.tr('recommendedActions'),
+            title: context.tr('recommendedTreatment'),
             items: diagnosis.recommendedActions,
+            icon: Icons.health_and_safety_outlined,
+          ),
+          _ResultSection(
+            title: context.tr('preventionAdvice'),
+            items: diagnosis.preventionActions,
+            icon: Icons.shield_outlined,
+          ),
+          _PestRiskCard(diagnosis: diagnosis),
+          _ResultSection(
+            title: context.tr('alternativeDiagnoses'),
+            items: diagnosis.alternativeDiagnoses,
+            icon: Icons.compare_arrows,
           ),
           _ResultSection(
             title: context.tr('precautions'),
             items: diagnosis.precautions,
+            icon: Icons.warning_amber_outlined,
           ),
           if (diagnosis.trapActionApplicable)
             _TrapActionCard(diagnosisId: diagnosis.id),
@@ -85,6 +95,119 @@ class DiagnosisResultPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DiagnosisHeader extends StatelessWidget {
+  const _DiagnosisHeader({required this.diagnosis});
+
+  final Diagnosis diagnosis;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final score = diagnosis.confidenceScore;
+    final color = switch (diagnosis.category) {
+      DiagnosisCategory.healthy => Colors.green,
+      DiagnosisCategory.disease => Colors.orange.shade800,
+      DiagnosisCategory.pest => Colors.red.shade700,
+      DiagnosisCategory.unknown => Colors.blueGrey,
+    };
+    return Card(
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.55),
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.tr('agriGuardInsights'),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              context.tr('result_${diagnosis.category.name}'),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(context.tr('guidanceConfidence')),
+            const SizedBox(height: 18),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: LinearProgressIndicator(
+                value: score / 100,
+                minHeight: 12,
+                color: color,
+                backgroundColor: color.withValues(alpha: 0.15),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${context.tr('confidence')}: $score% '
+              '(${context.tr('confidence_${diagnosis.confidence.name}')})',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PestRiskCard extends StatelessWidget {
+  const _PestRiskCard({required this.diagnosis});
+
+  final Diagnosis diagnosis;
+
+  @override
+  Widget build(BuildContext context) {
+    if (diagnosis.pestRisk == 'none' && diagnosis.likelyPests.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.bug_report_outlined),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '${context.tr('pestRisk')}: '
+                    '${context.tr('risk_${diagnosis.pestRisk}')}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
+            if (diagnosis.likelyPests.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(
+                context.tr('likelyPests'),
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: 8),
+              for (final pest in diagnosis.likelyPests)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text('•  $pest'),
+                ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -180,10 +303,15 @@ class _TrapActionCardState extends State<_TrapActionCard> {
 }
 
 class _ResultSection extends StatelessWidget {
-  const _ResultSection({required this.title, required this.items});
+  const _ResultSection({
+    required this.title,
+    required this.items,
+    this.icon = Icons.check_circle_outline,
+  });
 
   final String title;
   final List<String> items;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +322,18 @@ class _ResultSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            Row(
+              children: [
+                Icon(icon),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             for (final item in items)
               Padding(
