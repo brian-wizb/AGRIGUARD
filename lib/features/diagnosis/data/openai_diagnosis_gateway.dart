@@ -138,21 +138,34 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
 
     try {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
-      final output = body['output'] as List<dynamic>;
-      final message = output.cast<Map<String, dynamic>>().firstWhere(
-        (item) => item['type'] == 'message',
-      );
-      final content = message['content'] as List<dynamic>;
-      final textPart = content.cast<Map<String, dynamic>>().firstWhere(
-        (item) => item['type'] == 'output_text',
-      );
-      final result = jsonDecode(textPart['text'] as String);
+      if (body['status'] == 'incomplete') {
+        throw const DiagnosisFailure('analysisFailed');
+      }
+      final output = body['output'] as List<dynamic>? ?? const [];
+      final textParts = output
+          .whereType<Map<String, dynamic>>()
+          .expand(
+            (item) => (item['content'] as List<dynamic>? ?? const [])
+                .whereType<Map<String, dynamic>>(),
+          )
+          .where((item) => item['type'] == 'output_text')
+          .map((item) => item['text'])
+          .whereType<String>();
+      final outputText =
+          body['output_text'] as String? ??
+          (textParts.isEmpty ? null : textParts.join());
+      if (outputText == null || outputText.trim().isEmpty) {
+        throw const DiagnosisFailure('invalidResponse');
+      }
+      final result = jsonDecode(outputText);
       return Diagnosis.fromJson(
         result as Map<String, dynamic>,
         id: body['id'] as String,
         model: body['model'] as String? ?? _model,
         promptVersion: promptVersion,
       );
+    } on DiagnosisFailure {
+      rethrow;
     } on Exception {
       throw const DiagnosisFailure('invalidResponse');
     }
@@ -179,11 +192,7 @@ class OpenAiDiagnosisGateway implements DiagnosisGateway {
         'enum': ['high', 'medium', 'low'],
       },
       'summary': {'type': 'string'},
-      'confidence_score': {
-        'type': 'integer',
-        'minimum': 0,
-        'maximum': 99,
-      },
+      'confidence_score': {'type': 'integer', 'minimum': 0, 'maximum': 99},
       'symptoms': {
         'type': 'array',
         'items': {'type': 'string'},

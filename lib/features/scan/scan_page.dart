@@ -24,22 +24,27 @@ class _ScanPageState extends State<ScanPage> {
   final _gateway = OpenAiDiagnosisGateway();
   final _repository = DiagnosisRepository(AppDatabase());
   bool _busy = false;
+  XFile? _selectedImage;
+  String? _errorCode;
 
   Future<void> _pickAndAnalyze(ImageSource source) async {
     if (_busy) return;
-    final picked = await _picker.pickImage(
-      source: source,
-      imageQuality: 82,
-      maxWidth: 1600,
-      maxHeight: 1600,
-      requestFullMetadata: false,
-    );
-    if (picked == null || !mounted) return;
-    final languageCode = Localizations.localeOf(context).languageCode;
-    final userId = AppControllerScope.of(context).currentUser!.id;
-
-    setState(() => _busy = true);
     try {
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 82,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        requestFullMetadata: false,
+      );
+      if (picked == null || !mounted) return;
+      setState(() {
+        _selectedImage = picked;
+        _errorCode = null;
+        _busy = true;
+      });
+      final languageCode = Localizations.localeOf(context).languageCode;
+      final userId = AppControllerScope.of(context).currentUser!.id;
       final bytes = await picked.readAsBytes();
       final mimeType = _mimeTypeFor(picked.path);
       if (mimeType == null) {
@@ -60,9 +65,44 @@ class _ScanPageState extends State<ScanPage> {
         ),
       );
     } on DiagnosisFailure catch (error) {
-      if (mounted) _showError(context.tr(error.code));
+      if (mounted) _setError(error.code);
     } on Exception {
-      if (mounted) _showError(context.tr('unexpectedError'));
+      if (mounted) _setError('unexpectedError');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _retry() async {
+    final picked = _selectedImage;
+    if (picked == null || _busy) return;
+    final userId = AppControllerScope.of(context).currentUser!.id;
+    final languageCode = Localizations.localeOf(context).languageCode;
+    setState(() {
+      _errorCode = null;
+      _busy = true;
+    });
+    try {
+      final bytes = await picked.readAsBytes();
+      final mimeType = _mimeTypeFor(picked.path);
+      if (mimeType == null) throw const DiagnosisFailure('invalidImage');
+      var diagnosis = await _gateway.analyzeLeaf(
+        imageBytes: bytes,
+        mimeType: mimeType,
+        languageCode: languageCode,
+      );
+      diagnosis = diagnosis.copyWith(imagePath: await _saveImage(picked));
+      await _repository.save(userId: userId, diagnosis: diagnosis);
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => DiagnosisResultPage(diagnosis: diagnosis),
+        ),
+      );
+    } on DiagnosisFailure catch (error) {
+      if (mounted) _setError(error.code);
+    } on Exception {
+      if (mounted) _setError('unexpectedError');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -95,10 +135,11 @@ class _ScanPageState extends State<ScanPage> {
     return destination;
   }
 
-  void _showError(String message) {
+  void _setError(String code) {
+    setState(() => _errorCode = code);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(SnackBar(content: Text(context.tr(code))));
   }
 
   @override
@@ -176,6 +217,39 @@ class _ScanPageState extends State<ScanPage> {
               ),
             ),
             const SizedBox(height: 12),
+            if (_errorCode != null) ...[
+              Card(
+                color: theme.colorScheme.errorContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.error_outline),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(context.tr(_errorCode!))),
+                        ],
+                      ),
+                      if (_selectedImage != null) ...[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            key: const Key('retryScanButton'),
+                            onPressed: _busy ? null : _retry,
+                            icon: const Icon(Icons.refresh),
+                            label: Text(context.tr('retryAnalysis')),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             Text(
               context.tr('aiDisclaimer'),
               textAlign: TextAlign.center,

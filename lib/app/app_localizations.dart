@@ -45,6 +45,13 @@ class AppLocalizations {
       'history': 'History',
       'devices': 'Trap',
       'settings': 'Settings',
+      'help': 'Help',
+      'quickActions': 'Quick actions',
+      'homeIntro':
+          'Protect your crops with fast leaf checks and practical guidance.',
+      'cropGuide': 'Crop photo guide',
+      'photoTipTitle': 'Better photo, better result',
+      'photoTip': 'Use natural light and fill the frame with one leaf.',
       'scanTitle': 'Scan any leaf',
       'scanDescription':
           'Point the camera at one clear leaf. AgriGuard will identify the plant and check for visible disease or pest signs.',
@@ -88,12 +95,42 @@ class AppLocalizations {
       'networkError': 'Connect to the internet and try again.',
       'rateLimited': 'The scan limit was reached. Please wait and try again.',
       'analysisFailed': 'The leaf could not be analyzed. Please try again.',
+      'retryAnalysis': 'Retry this image',
       'invalidResponse':
           'The diagnosis response was invalid. Please try again.',
       'historyLoadFailed': 'Scan history could not be loaded.',
       'noCropSelection': 'No crop selection is required.',
       'recentScans': 'Recent scans',
       'emptyHistory': 'Your completed leaf scans will appear here.',
+      'cropGuideIntro':
+          'A clear, close photo helps AgriGuard return a more useful assessment.',
+      'guideLightTitle': 'Use even natural light',
+      'guideLight':
+          'Avoid deep shadows, glare, and flash reflections on the leaf.',
+      'guideFrameTitle': 'Fill the frame',
+      'guideFrame':
+          'Hold the camera steady and keep one whole affected leaf in focus.',
+      'guideCleanTitle': 'Use a simple background',
+      'guideClean':
+          'Move clutter away so the leaf edges and symptoms are easy to see.',
+      'guideSidesTitle': 'Check both sides',
+      'guideSides':
+          'If signs differ, scan the top and underside as separate photos.',
+      'guideAvoidTitle': 'Avoid unusable photos',
+      'guideAvoid':
+          'Do not use screenshots, distant plants, severe blur, or heavily cropped leaves.',
+      'helpScanTitle': 'How do I scan a leaf?',
+      'helpScanBody':
+          'Open Scan, use the camera or choose a JPG, PNG, or WEBP image under 8 MB, then keep the app open while it analyzes.',
+      'helpResultsTitle': 'How should I use a result?',
+      'helpResultsBody':
+          'Review confidence, visible signs, alternatives, treatment, and prevention together. Low confidence means you should collect a clearer photo or seek expert advice.',
+      'helpPrivacyTitle': 'Where is my information stored?',
+      'helpPrivacyBody':
+          'Your local account and saved scan history remain on this device. The selected image is sent for AI analysis.',
+      'helpSafetyTitle': 'Treatment and trap safety',
+      'helpSafetyBody':
+          'Confirm important treatment decisions with an agricultural expert and follow registered product labels. Keep people and animals clear before activating hardware.',
       'trapTitle': 'Arduino trap',
       'trapDescription':
           'Connect and control the approved trap after a diagnosis.',
@@ -167,6 +204,13 @@ class AppLocalizations {
       'history': 'Historia',
       'devices': 'Mtego',
       'settings': 'Mipangilio',
+      'help': 'Msaada',
+      'quickActions': 'Hatua za haraka',
+      'homeIntro':
+          'Linda mazao yako kwa uchunguzi wa haraka wa majani na mwongozo wa vitendo.',
+      'cropGuide': 'Mwongozo wa picha ya zao',
+      'photoTipTitle': 'Picha bora, matokeo bora',
+      'photoTip': 'Tumia mwanga wa asili na jani moja lijaze picha.',
       'scanTitle': 'Changanua jani lolote',
       'scanDescription':
           'Elekeza kamera kwenye jani moja linaloonekana vizuri. AgriGuard itatambua mmea na kuchunguza dalili za ugonjwa au wadudu.',
@@ -181,8 +225,7 @@ class AppLocalizations {
       'result_disease': 'Ugonjwa Umegunduliwa',
       'result_pest': 'Mdudu Mharibifu Amegunduliwa',
       'result_unknown': 'Uchunguzi Hauna Uhakika',
-      'guidanceConfidence':
-          'Uhakika umekadiriwa kwa maamuzi ya mwongozo.',
+      'guidanceConfidence': 'Uhakika umekadiriwa kwa maamuzi ya mwongozo.',
       'confidence': 'Uhakika',
       'primaryAssessment': 'Uchunguzi mkuu',
       'notLeaf': 'Hakuna jani lililotambuliwa',
@@ -210,11 +253,41 @@ class AppLocalizations {
       'networkError': 'Unganisha intaneti kisha ujaribu tena.',
       'rateLimited': 'Kikomo cha uchunguzi kimefikiwa. Subiri ujaribu tena.',
       'analysisFailed': 'Jani halikuweza kuchunguzwa. Jaribu tena.',
+      'retryAnalysis': 'Jaribu picha hii tena',
       'invalidResponse': 'Jibu la uchunguzi si sahihi. Jaribu tena.',
       'historyLoadFailed': 'Historia ya uchunguzi haikuweza kufunguliwa.',
       'noCropSelection': 'Huhitaji kuchagua zao.',
       'recentScans': 'Uchanganuzi wa hivi karibuni',
       'emptyHistory': 'Uchanganuzi wa majani uliokamilika utaonekana hapa.',
+      'cropGuideIntro':
+          'Picha iliyo wazi na ya karibu husaidia AgriGuard kutoa uchunguzi wenye manufaa zaidi.',
+      'guideLightTitle': 'Tumia mwanga wa asili ulio sawa',
+      'guideLight':
+          'Epuka vivuli vizito, mwangaza mkali na mng’ao wa flash kwenye jani.',
+      'guideFrameTitle': 'Jani lijaze picha',
+      'guideFrame':
+          'Shikilia kamera vizuri na uweke jani moja lote lenye tatizo katika fokasi.',
+      'guideCleanTitle': 'Tumia mandharinyuma rahisi',
+      'guideClean':
+          'Ondoa vitu vingine ili kingo na dalili za jani zionekane vizuri.',
+      'guideSidesTitle': 'Kagua pande zote mbili',
+      'guideSides':
+          'Kama dalili zinatofautiana, piga picha upande wa juu na chini kivyake.',
+      'guideAvoidTitle': 'Epuka picha zisizofaa',
+      'guideAvoid':
+          'Usitumie picha za skrini, mimea ya mbali, picha iliyofifia au jani lililokatwa sana.',
+      'helpScanTitle': 'Ninachanganuaje jani?',
+      'helpScanBody':
+          'Fungua Changanua, tumia kamera au chagua JPG, PNG au WEBP chini ya MB 8, kisha acha programu wazi inapochunguza.',
+      'helpResultsTitle': 'Nitumieje matokeo?',
+      'helpResultsBody':
+          'Kagua uhakika, dalili zinazoonekana, sababu mbadala, matibabu na kinga kwa pamoja. Uhakika mdogo unahitaji picha wazi zaidi au ushauri wa mtaalamu.',
+      'helpPrivacyTitle': 'Taarifa zangu zinahifadhiwa wapi?',
+      'helpPrivacyBody':
+          'Akaunti na historia ya uchunguzi hubaki kwenye kifaa hiki. Picha iliyochaguliwa hutumwa kwa uchunguzi wa AI.',
+      'helpSafetyTitle': 'Usalama wa matibabu na mtego',
+      'helpSafetyBody':
+          'Thibitisha maamuzi muhimu ya matibabu na mtaalamu wa kilimo na fuata lebo za bidhaa zilizosajiliwa. Weka watu na wanyama mbali kabla ya kuwasha kifaa.',
       'trapTitle': 'Mtego wa Arduino',
       'trapDescription':
           'Unganisha na udhibiti mtego ulioidhinishwa baada ya uchunguzi.',
