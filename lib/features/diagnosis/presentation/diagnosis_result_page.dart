@@ -29,7 +29,7 @@ class DiagnosisResultPage extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 16),
-          _DiagnosisHeader(diagnosis: diagnosis),
+          if (diagnosis.isLeaf) _DiagnosisHeader(diagnosis: diagnosis),
           Card(
             child: ListTile(
               leading: const Icon(Icons.eco_outlined),
@@ -39,61 +39,70 @@ class DiagnosisResultPage extends StatelessWidget {
               subtitle: Text(diagnosis.summary),
             ),
           ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.tr('primaryAssessment'),
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    diagnosis.conditionName,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+          if (diagnosis.isLeaf)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.tr('primaryAssessment'),
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    Text(
+                      diagnosis.conditionName,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          _ResultSection(
-            title: context.tr('visibleSigns'),
-            items: diagnosis.symptoms,
-          ),
-          _ResultSection(
-            title: context.tr('recommendedTreatment'),
-            items: diagnosis.recommendedActions,
-            icon: Icons.health_and_safety_outlined,
-          ),
-          _ResultSection(
-            title: context.tr('preventionAdvice'),
-            items: diagnosis.preventionActions,
-            icon: Icons.shield_outlined,
-          ),
-          _PestRiskCard(diagnosis: diagnosis),
-          _ResultSection(
-            title: context.tr('alternativeDiagnoses'),
-            items: diagnosis.alternativeDiagnoses,
-            icon: Icons.compare_arrows,
-          ),
-          _ResultSection(
-            title: context.tr('precautions'),
-            items: diagnosis.precautions,
-            icon: Icons.warning_amber_outlined,
-          ),
-          if (diagnosis.trapActionApplicable)
-            _TrapActionCard(diagnosisId: diagnosis.id),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: Text(context.tr('aiDisclaimer')),
-              subtitle: Text('${diagnosis.model} • ${diagnosis.promptVersion}'),
+          if (diagnosis.isLeaf)
+            _ResultSection(
+              title: context.tr('visibleSigns'),
+              items: diagnosis.symptoms,
             ),
-          ),
+          if (diagnosis.isLeaf)
+            _ResultSection(
+              title: context.tr('recommendedTreatment'),
+              items: diagnosis.recommendedActions,
+              icon: Icons.health_and_safety_outlined,
+            ),
+          if (diagnosis.isLeaf)
+            _ResultSection(
+              title: context.tr('preventionAdvice'),
+              items: diagnosis.preventionActions,
+              icon: Icons.shield_outlined,
+            ),
+          if (diagnosis.isLeaf) _PestRiskCard(diagnosis: diagnosis),
+          if (diagnosis.isLeaf)
+            _ResultSection(
+              title: context.tr('alternativeDiagnoses'),
+              items: diagnosis.alternativeDiagnoses,
+              icon: Icons.compare_arrows,
+            ),
+          if (diagnosis.isLeaf)
+            _ResultSection(
+              title: context.tr('precautions'),
+              items: diagnosis.precautions,
+              icon: Icons.warning_amber_outlined,
+            ),
+          if (diagnosis.isLeaf && diagnosis.trapActionApplicable)
+            _TrapActionCard(diagnosisId: diagnosis.id),
+          if (diagnosis.isLeaf)
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: Text(context.tr('aiDisclaimer')),
+                subtitle: Text(
+                  '${diagnosis.model} • ${diagnosis.promptVersion}',
+                ),
+              ),
+            ),
         ],
       ),
     );

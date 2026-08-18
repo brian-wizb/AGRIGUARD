@@ -39,7 +39,7 @@ class _AppShellState extends State<AppShell> {
         onCropGuide: () => _open(const CropGuidePage()),
         onHelp: () => _open(const HelpPage()),
       ),
-      const ScanPage(),
+      ScanPage(onRecoveredCameraImage: () => setState(() => _index = 1)),
       const HistoryPage(),
       const DevicePage(),
       const SettingsPage(),

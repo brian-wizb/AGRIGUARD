@@ -13,7 +13,9 @@ import '../diagnosis/data/openai_diagnosis_gateway.dart';
 import '../diagnosis/presentation/diagnosis_result_page.dart';
 
 class ScanPage extends StatefulWidget {
-  const ScanPage({super.key});
+  const ScanPage({this.onRecoveredCameraImage, super.key});
+
+  final VoidCallback? onRecoveredCameraImage;
 
   @override
   State<ScanPage> createState() => _ScanPageState();
@@ -24,11 +26,26 @@ class _ScanPageState extends State<ScanPage> {
   final _gateway = OpenAiDiagnosisGateway();
   final _repository = DiagnosisRepository(AppDatabase());
   bool _busy = false;
+  bool _pickingImage = false;
   XFile? _selectedImage;
   String? _errorCode;
 
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isAndroid) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _recoverLostCameraImage(),
+      );
+    }
+  }
+
   Future<void> _pickAndAnalyze(ImageSource source) async {
-    if (_busy) return;
+    if (_busy || _pickingImage) return;
+    setState(() {
+      _errorCode = null;
+      _pickingImage = true;
+    });
     try {
       final picked = await _picker.pickImage(
         source: source,
@@ -39,31 +56,33 @@ class _ScanPageState extends State<ScanPage> {
       );
       if (picked == null || !mounted) return;
       setState(() {
-        _selectedImage = picked;
-        _errorCode = null;
+        _pickingImage = false;
         _busy = true;
       });
-      final languageCode = Localizations.localeOf(context).languageCode;
-      final userId = AppControllerScope.of(context).currentUser!.id;
-      final bytes = await picked.readAsBytes();
-      final mimeType = _mimeTypeFor(picked.path);
-      if (mimeType == null) {
-        throw const DiagnosisFailure('invalidImage');
+      await _analyzeImage(picked);
+    } on DiagnosisFailure catch (error) {
+      if (mounted) _setError(error.code);
+    } on Exception {
+      if (mounted) _setError('unexpectedError');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _pickingImage = false;
+          _busy = false;
+        });
       }
-      var diagnosis = await _gateway.analyzeLeaf(
-        imageBytes: bytes,
-        mimeType: mimeType,
-        languageCode: languageCode,
-      );
-      final imagePath = await _saveImage(picked);
-      diagnosis = diagnosis.copyWith(imagePath: imagePath);
-      await _repository.save(userId: userId, diagnosis: diagnosis);
-      if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => DiagnosisResultPage(diagnosis: diagnosis),
-        ),
-      );
+    }
+  }
+
+  Future<void> _retry() async {
+    final picked = _selectedImage;
+    if (picked == null || _busy) return;
+    setState(() {
+      _errorCode = null;
+      _busy = true;
+    });
+    try {
+      await _analyzeImage(picked);
     } on DiagnosisFailure catch (error) {
       if (mounted) _setError(error.code);
     } on Exception {
@@ -73,39 +92,49 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
-  Future<void> _retry() async {
-    final picked = _selectedImage;
-    if (picked == null || _busy) return;
-    final userId = AppControllerScope.of(context).currentUser!.id;
-    final languageCode = Localizations.localeOf(context).languageCode;
-    setState(() {
-      _errorCode = null;
-      _busy = true;
-    });
+  Future<void> _recoverLostCameraImage() async {
     try {
-      final bytes = await picked.readAsBytes();
-      final mimeType = _mimeTypeFor(picked.path);
-      if (mimeType == null) throw const DiagnosisFailure('invalidImage');
-      var diagnosis = await _gateway.analyzeLeaf(
-        imageBytes: bytes,
-        mimeType: mimeType,
-        languageCode: languageCode,
-      );
-      diagnosis = diagnosis.copyWith(imagePath: await _saveImage(picked));
-      await _repository.save(userId: userId, diagnosis: diagnosis);
-      if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => DiagnosisResultPage(diagnosis: diagnosis),
-        ),
-      );
-    } on DiagnosisFailure catch (error) {
-      if (mounted) _setError(error.code);
+      final response = await _picker.retrieveLostData();
+      if (!mounted || response.isEmpty) return;
+      if (response.exception != null || response.file == null) {
+        _setError('unexpectedError');
+        return;
+      }
+      widget.onRecoveredCameraImage?.call();
+      setState(() {
+        _errorCode = null;
+        _busy = true;
+      });
+      await _analyzeImage(response.file!);
     } on Exception {
       if (mounted) _setError('unexpectedError');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _analyzeImage(XFile picked) async {
+    final imagePath = await _saveImage(picked);
+    if (!mounted) return;
+    setState(() => _selectedImage = XFile(imagePath));
+    final mimeType = _mimeTypeFor(imagePath);
+    if (mimeType == null) throw const DiagnosisFailure('invalidImage');
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final userId = AppControllerScope.of(context).currentUser!.id;
+    final bytes = await File(imagePath).readAsBytes();
+    var diagnosis = await _gateway.analyzeLeaf(
+      imageBytes: bytes,
+      mimeType: mimeType,
+      languageCode: languageCode,
+    );
+    diagnosis = diagnosis.copyWith(imagePath: imagePath);
+    await _repository.save(userId: userId, diagnosis: diagnosis);
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => DiagnosisResultPage(diagnosis: diagnosis),
+      ),
+    );
   }
 
   String? _mimeTypeFor(String filePath) {
@@ -194,7 +223,7 @@ class _ScanPageState extends State<ScanPage> {
                       width: double.infinity,
                       child: FilledButton.icon(
                         key: const Key('cameraButton'),
-                        onPressed: _busy
+                        onPressed: _busy || _pickingImage
                             ? null
                             : () => _pickAndAnalyze(ImageSource.camera),
                         icon: const Icon(Icons.camera_alt_outlined),
@@ -205,7 +234,7 @@ class _ScanPageState extends State<ScanPage> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: _busy
+                        onPressed: _busy || _pickingImage
                             ? null
                             : () => _pickAndAnalyze(ImageSource.gallery),
                         icon: const Icon(Icons.photo_library_outlined),
