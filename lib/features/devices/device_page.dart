@@ -14,10 +14,10 @@ class DevicePage extends StatefulWidget {
 class _DevicePageState extends State<DevicePage> {
   final _controller = HardwareController.instance;
 
-  Future<void> _runCommand(Future<void> Function() command) async {
+  Future<void> _runCommand(Future<dynamic> Function() command) async {
     try {
-      await command();
-      if (mounted) _message(context.tr('commandAcknowledged'));
+      final acknowledgement = await command();
+      if (mounted) _message(acknowledgement.message);
     } on HardwareCommandFailure catch (error) {
       if (mounted) _message(context.tr(error.code));
     }
@@ -69,6 +69,7 @@ class _DevicePageState extends State<DevicePage> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
+                      if (connected) _TrapStatus(controller: _controller),
                       if (connected)
                         Wrap(
                           spacing: 8,
@@ -82,7 +83,21 @@ class _DevicePageState extends State<DevicePage> {
                               icon: const Icon(Icons.monitor_heart_outlined),
                               label: Text(context.tr('checkStatus')),
                             ),
-                            FilledButton.tonalIcon(
+                            FilledButton.icon(
+                              key: const Key('activateTrapFromDevicePage'),
+                              onPressed: () => _runCommand(
+                                () => _controller.activate(
+                                  diagnosisId: null,
+                                  durationSeconds: 0,
+                                ),
+                              ),
+                              icon: const Icon(Icons.play_arrow),
+                              label: Text(context.tr('activateTrap')),
+                            ),
+                            FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Colors.red,
+                              ),
                               key: const Key('emergencyStopButton'),
                               onPressed: () =>
                                   _runCommand(() async => _controller.stop()),
@@ -152,6 +167,52 @@ class _DevicePageState extends State<DevicePage> {
           ),
         );
       },
+    );
+  }
+}
+
+class _TrapStatus extends StatelessWidget {
+  const _TrapStatus({required this.controller});
+
+  final HardwareController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final servoState = controller.isTrapOpen == null
+        ? 'Unknown Ã¢â‚¬â€ tap Check status'
+        : controller.isTrapOpen!
+        ? 'OPEN'
+        : 'CLOSED';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Card(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(
+                controller.isTrapOpen == true
+                    ? Icons.lock_open_outlined
+                    : Icons.lock_outline,
+              ),
+              title: Text('Servo: $servoState'),
+              subtitle: Text(
+                'IR detections: ${controller.detectedCount ?? 'Not checked'}',
+              ),
+            ),
+            if (controller.lastCommandMessage != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Last Arduino response: ${controller.lastCommandMessage}',
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

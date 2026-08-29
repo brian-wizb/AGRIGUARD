@@ -30,11 +30,15 @@ class HardwareController extends ChangeNotifier {
   final HardwareCommandRepository _repository;
   final Map<String, Completer<TrapAcknowledgement>> _pending = {};
   late final StreamSubscription<String> _lineSubscription;
+  Timer? _statusTimer;
 
   HardwareConnectionState state = HardwareConnectionState.disconnected;
   List<HardwareDeviceInfo> devices = const [];
   HardwareDeviceInfo? connectedDevice;
   String? errorCode;
+  int? detectedCount;
+  bool? isTrapOpen;
+  String? lastCommandMessage;
 
   Future<void> discover() async {
     state = HardwareConnectionState.discovering;
@@ -58,6 +62,11 @@ class HardwareController extends ChangeNotifier {
       await _transport.connect(device.id);
       connectedDevice = device;
       state = HardwareConnectionState.connected;
+      _statusTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+        if (state == HardwareConnectionState.connected) {
+          requestStatus().catchError((_) {});
+        }
+      });
     } on Exception {
       errorCode = 'usbConnectionFailed';
       state = HardwareConnectionState.disconnected;
@@ -66,6 +75,8 @@ class HardwareController extends ChangeNotifier {
   }
 
   Future<void> disconnect() async {
+    _statusTimer?.cancel();
+    _statusTimer = null;
     await _transport.disconnect();
     connectedDevice = null;
     state = HardwareConnectionState.disconnected;
@@ -79,8 +90,8 @@ class HardwareController extends ChangeNotifier {
   }
 
   Future<TrapAcknowledgement> activate({
-    required String diagnosisId,
-    int durationSeconds = 10,
+    required String? diagnosisId,
+    int durationSeconds = 0,
   }) {
     return _send(
       type: TrapCommandType.activate,
@@ -117,6 +128,7 @@ class HardwareController extends ChangeNotifier {
       final acknowledgement = await completer.future.timeout(
         const Duration(seconds: 4),
       );
+      _applyAcknowledgement(acknowledgement);
       await _repository.record(
         id: _newId(),
         diagnosisId: diagnosisId,
@@ -168,6 +180,22 @@ class HardwareController extends ChangeNotifier {
     }
   }
 
+  void _applyAcknowledgement(TrapAcknowledgement acknowledgement) {
+    lastCommandMessage = acknowledgement.message;
+    final status = RegExp(
+      r'^COUNT_(\d+)_SERVO_(OPEN|CLOSED)$',
+    ).firstMatch(acknowledgement.message);
+    if (status != null) {
+      detectedCount = int.parse(status.group(1)!);
+      isTrapOpen = status.group(2) == 'OPEN';
+    } else if (acknowledgement.message == 'ACTIVATED') {
+      isTrapOpen = true;
+    } else if (acknowledgement.message == 'STOPPED') {
+      isTrapOpen = false;
+    }
+    notifyListeners();
+  }
+
   String _newId() {
     final random = Random.secure().nextInt(1 << 32).toRadixString(16);
     return '${DateTime.now().microsecondsSinceEpoch}-$random';
@@ -175,6 +203,7 @@ class HardwareController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _statusTimer?.cancel();
     _lineSubscription.cancel();
     _transport.disconnect();
     super.dispose();

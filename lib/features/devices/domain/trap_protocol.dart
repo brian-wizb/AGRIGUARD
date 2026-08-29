@@ -31,7 +31,7 @@ abstract final class TrapProtocol {
   static String encode(TrapCommand command) {
     if (command.type == TrapCommandType.activate) {
       final duration = command.durationSeconds;
-      if (duration == null || duration < 1 || duration > maxActivationSeconds) {
+      if (duration == null || duration < 0 || duration > maxActivationSeconds) {
         throw const FormatException('Unsafe activation duration');
       }
     }
